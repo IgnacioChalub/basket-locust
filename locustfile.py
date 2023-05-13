@@ -23,6 +23,11 @@ class AppUser(HttpUser):
     @task
     def create_match(self):
         teams_response = self.client.get('api/team/all')
+        try:
+            teams_response.raise_for_status()
+        except Exception as e:
+            return
+
         teams = teams_response.json()
 
         if len(teams) < 2:
@@ -38,12 +43,23 @@ class AppUser(HttpUser):
             "visitorTeamId": team2['id']
         }
         match_response = self.client.post('api/match', json=data)
+        try:
+            match_response.raise_for_status()
+        except Exception as e:
+            return
+
         match = match_response.json()
         self.client.get('api/match/' + match['id'])
 
     @task
     def create_fault(self):
-        matches = self.client.get("api/match/all").json()
+        matches_response = self.client.get("api/match/all")
+        try:
+            matches_response.raise_for_status()
+        except Exception as e:
+            return
+        matches = matches_response.json()
+
         if len(matches) < 1:
             return
 
@@ -56,6 +72,10 @@ class AppUser(HttpUser):
         if match_index % 2 == 0:
             team = 'localTeam'
         players = match[team]['players']
+
+        if len(players) < 1:
+            return
+
         #selects random player
         player_index = randrange(len(players))
         player = players[player_index]
@@ -69,7 +89,14 @@ class AppUser(HttpUser):
 
     @task
     def create_annotation(self):
-        matches = self.client.get("api/match/all").json()
+        matches_response = self.client.get("api/match/all")
+        try:
+            matches_response.raise_for_status()
+        except Exception as e:
+            return
+
+        matches = matches_response.json()
+
         if len(matches) < 1:
             return
 
@@ -82,6 +109,9 @@ class AppUser(HttpUser):
         if match_index % 2 == 0:
             team = 'localTeam'
         players = match[team]['players']
+
+        if len(players) < 1:
+            return
 
         #selects random player
         player_index = randrange(len(players))
