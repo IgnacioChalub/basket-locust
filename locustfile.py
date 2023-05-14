@@ -1,6 +1,9 @@
 from locust import HttpUser, task, between
 from random import randrange
 
+# to run locust use:
+# locust -f locustfile.py
+
 class AppUser(HttpUser):
     wait_time=between(2,5)
 
